@@ -17,32 +17,32 @@ func New(s store.Store) *Service {
 	}
 }
 
-func (s *Service) GetAllBooks() ([]*model.Libro, error) {
-	libros, err :=  s.store.GetAll()
+func (s *Service) GetAllBooks() ([]*model.Book, error) {
+	books, err :=  s.store.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
-	return libros, nil
+	return books, nil
 }
 
-func (s *Service) GetBookByID(id int) (*model.Libro, error) {
+func (s *Service) GetBookByID(id int) (*model.Book, error) {
 	return s.store.GetByID(id)
 }
 
-func (s *Service) CreateBook(libro model.Libro) (*model.Libro, error) {
-	if libro.Titulo == "" {
+func (s *Service) CreateBook(book model.Book) (*model.Book, error) {
+	if book.Title == "" {
 		return nil, errors.New("error: el título no puede estar vacío")
 	}
-	return s.store.Create(&libro)
+	return s.store.Create(&book)
 }
 
-func (s *Service) UpdateBook(id int, libro model.Libro) (*model.Libro, error) {
-	if libro.Titulo == "" {
+func (s *Service) UpdateBook(id int, book model.Book) (*model.Book, error) {
+	if book.Title == "" {
 		return nil, errors.New("error: el título no puede estar vacío")
 	}
 
-	return s.store.Update(id, &libro)
+	return s.store.Update(id, &book)
 }
 
 func (s *Service) DeleteBook(id int) error { 
