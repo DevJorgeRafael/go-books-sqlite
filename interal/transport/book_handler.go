@@ -4,6 +4,8 @@ import (
 	"books-sqlite/interal/model"
 	"books-sqlite/interal/service"
 	"encoding/json"
+	"errors"
+	customerrors "books-sqlite/interal/errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -92,7 +94,11 @@ func (h *BookHandler) HandleBookByID(w http.ResponseWriter, r *http.Request) {
 
 		case http.MethodDelete:
 			if err := h.service.DeleteBook(id); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				if errors.Is(err, customerrors.ErrNotFound) {
+					http.Error(w, "Libro no encontrado", http.StatusNotFound)
+				} else {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
 				return
 			}
 
@@ -102,5 +108,4 @@ func (h *BookHandler) HandleBookByID(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Método no disponible", http.StatusMethodNotAllowed)
 			return
 	}
-
 }

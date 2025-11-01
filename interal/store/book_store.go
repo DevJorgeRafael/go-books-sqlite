@@ -2,6 +2,7 @@ package store
 
 import (
 	"books-sqlite/interal/model"
+	customerrors "books-sqlite/interal/errors"
 	"database/sql"
 	"fmt"
 )
@@ -207,9 +208,17 @@ func (s *store) Update(id int, book *model.Book) (*model.Book, error) {
 func (s *store) Delete(id int) error {
 	q := `DELETE FROM books WHERE id = ?`
 
-	_, err := s.db.Exec(q, id)
+	result, err := s.db.Exec(q, id)
 	if err != nil {
 		return fmt.Errorf("error eliminando libro: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error obteniendo filas afectadas al eliminar libro: %w", err)
+	}
+	if rowsAffected == 0 {
+		return customerrors.ErrNotFound
 	}
 
 	return nil
