@@ -1,10 +1,8 @@
 package main
 
 import (
+	"books-sqlite/interal/app"
 	"books-sqlite/interal/database"
-	"books-sqlite/interal/service"
-	"books-sqlite/interal/store"
-	"books-sqlite/interal/transport"
 	"database/sql"
 	"os"
 	"os/signal"
@@ -39,15 +37,8 @@ func main() {
 		log.Fatal("Error ejecutando mgiraciones: ", err)
 	}
 
-	// Inyección de dependencias
-	bookStore := store.New(db)
-	bookService := service.New(bookStore)
-	bookHandler := transport.New(bookService)
-
-
-	// Configurar las rutas HTTP
-	http.HandleFunc("/books", bookHandler.HandleBooks)
-	http.HandleFunc("/books/", bookHandler.HandleBookByID)
+	container := app.NewContainer(db)
+	app.SetupRoutes(container)
 
 	// Manejo graceful, permite que la app se cierre limpiamente
 	go handleShutdown(db)

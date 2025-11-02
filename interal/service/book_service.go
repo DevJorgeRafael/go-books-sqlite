@@ -7,18 +7,18 @@ import (
 )
 
 
-type Service struct {
-	store store.Store
+type BookService struct {
+	Store store.BookStore
 }
 
-func New(s store.Store) *Service {
-	return &Service{ 
-		store: s,
+func NewBookService(s store.BookStore) *BookService {
+	return &BookService{
+		Store: s,
 	}
 }
 
-func (s *Service) GetAllBooks() ([]*model.Book, error) {
-	books, err :=  s.store.GetAll()
+func (s *BookService) GetAllBooks() ([]*model.Book, error) {
+	books, err :=  s.Store.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -26,25 +26,21 @@ func (s *Service) GetAllBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-func (s *Service) GetBookByID(id int) (*model.Book, error) {
-	return s.store.GetByID(id)
+func (s *BookService) GetBookByID(id int) (*model.Book, error) {
+	return s.Store.GetByID(id)
 }
 
-func (s *Service) CreateBook(book model.Book) (*model.Book, error) {
+func (s *BookService) CreateBook(book model.Book) (*model.Book, error) {
 	if book.Title == "" {
-		return nil, errors.New("error: el título no puede estar vacío")
+		return nil, errors.New("error: the title cannot be empty")
 	}
-	return s.store.Create(&book)
+	return s.Store.Create(&book)
 }
 
-func (s *Service) UpdateBook(id int, book model.Book) (*model.Book, error) {
-	if book.Title == "" {
-		return nil, errors.New("error: el título no puede estar vacío")
-	}
-
-	return s.store.Update(id, &book)
+func (s *BookService) UpdateBook(id int, book model.Book) (*model.Book, error) {
+	return s.Store.Update(id, &book)
 }
 
-func (s *Service) DeleteBook(id int) error { 
-	return s.store.Delete(id)
+func (s *BookService) DeleteBook(id int) error {
+	return s.Store.Delete(id)
 }

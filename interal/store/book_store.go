@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-type Store interface {
+type BookStore interface {
 	GetAll() ([]*model.Book, error)
 	GetByID(id int) (*model.Book, error)
 	Create(book *model.Book) (*model.Book, error)
@@ -15,16 +15,16 @@ type Store interface {
 	Delete(id int) error
 }
 
-type store struct {
+type bookStore struct {
 	db *sql.DB
 }
 
-func New(db *sql.DB) Store {
-	return &store{db: db}
+func NewBookStore(db *sql.DB) BookStore {
+	return &bookStore{db: db}
 }
 
 // GetAll contiene todos los libros (SIN autores)
-func (s *store) GetAll() ([]*model.Book, error) {
+func (s *bookStore) GetAll() ([]*model.Book, error) {
 	q := `SELECT id, title, publication_year, isbn, created_at FROM books`
 
 	rows, err := s.db.Query(q)
@@ -74,8 +74,8 @@ func (s *store) GetAll() ([]*model.Book, error) {
 	return books, nil
 }
 
-// getByID obtiene un libro por su ID con sus autores relacionados
-func (s *store) GetByID(id int) (*model.Book, error) {
+// GetByID obtiene un libro por su ID con sus autores relacionados
+func (s *bookStore) GetByID(id int) (*model.Book, error) {
 	q := `SELECT id, title, publication_year, isbn, created_at FROM books WHERE id = ?`
 
 	book := &model.Book{}
@@ -92,7 +92,7 @@ func (s *store) GetByID(id int) (*model.Book, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("libro con ID %d no encontrado", id)
+			return nil, customerrors.ErrNotFound
 		}
 		return nil, fmt.Errorf("error consultando libro: %w", err)
 	}
@@ -154,7 +154,7 @@ func (s *store) GetByID(id int) (*model.Book, error) {
 }
 
 // Create crea un nuevo libro
-func (s *store) Create(book *model.Book) (*model.Book, error) {
+func (s *bookStore) Create(book *model.Book) (*model.Book, error) {
 	q := `INSERT INTO books (title, publication_year, isbn) VALUES (?, ?, ?)`
 
 	// Convertir punteros a sql.NULL*
@@ -185,7 +185,7 @@ func (s *store) Create(book *model.Book) (*model.Book, error) {
 	return s.GetByID(book.Id)
 }
 
-func (s *store) Update(id int, book *model.Book) (*model.Book, error) {
+func (s *bookStore) Update(id int, book *model.Book) (*model.Book, error) {
 	q := `UPDATE books SET title = ?, publication_year = ?, isbn = ? WHERE id = ?`
 
 	// Convertir punteros a sql.NULL*
@@ -205,7 +205,7 @@ func (s *store) Update(id int, book *model.Book) (*model.Book, error) {
 	return s.GetByID(id)
 }
 
-func (s *store) Delete(id int) error {
+func (s *bookStore) Delete(id int) error {
 	q := `DELETE FROM books WHERE id = ?`
 
 	result, err := s.db.Exec(q, id)

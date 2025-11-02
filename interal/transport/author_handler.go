@@ -11,36 +11,36 @@ import (
 	"strings"
 )
 
-type BookHandler struct {
-	service *service.BookService
+type AuthorHandler struct {
+	service *service.AuthorService
 }
 
-func NewBookHandler(s *service.BookService) *BookHandler {
-	return &BookHandler{
+func NewAuthorHandler(s *service.AuthorService) *AuthorHandler {
+	return &AuthorHandler{
 		service: s,
 	}
 }
 
-func (h *BookHandler) HandleBooks(w http.ResponseWriter, r *http.Request) {
+func (h *AuthorHandler) HandleAuthors(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 		case http.MethodGet:
-			books, err := h.service.GetAllBooks()
+			authors, err := h.service.GetAllAuthors()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return 
+				return
 			}
-
+			
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(books)
-
+			json.NewEncoder(w).Encode(authors)
+		
 		case http.MethodPost:
-			var book model.Book
-			if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+			var author model.Author
+			if err := json.NewDecoder(r.Body).Decode(&author); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			created, err := h.service.CreateBook(book)
+			created, err := h.service.CreateAuthor(author)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -50,26 +50,25 @@ func (h *BookHandler) HandleBooks(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(created)
 
-
-		default: 
+		default:
 			http.Error(w, "Método no disponible", http.StatusMethodNotAllowed)
 			return
-	}	
+	}
 }
 
-func (h *BookHandler) HandleBookByID(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/books/")
+func (h *AuthorHandler) HandleAuthorByID(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/authors/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 	}
 
 	switch r.Method {
-		case http.MethodGet: 
-			libro, err := h.service.GetBookByID(id)
+		case http.MethodGet:
+			author, err := h.service.GetAuthorByID(id)
 			if err != nil {
 				if errors.Is(err, customerrors.ErrNotFound) {
-					http.Error(w, "Libro no encontrado", http.StatusNotFound)
+					http.Error(w, "Autor no encontrado", http.StatusNotFound)
 				} else {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 				}
@@ -77,16 +76,16 @@ func (h *BookHandler) HandleBookByID(w http.ResponseWriter, r *http.Request) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(libro)
+			json.NewEncoder(w).Encode(author)
 
 		case http.MethodPut:
-			var book model.Book
-			if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
-				http.Error(w, "input inválido", http.StatusBadRequest)
+			var author model.Author
+			if err := json.NewDecoder(r.Body).Decode(&author); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			updated, err := h.service.UpdateBook(id, book)
+			updated, err := h.service.UpdateAuthor(id, author)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -95,11 +94,10 @@ func (h *BookHandler) HandleBookByID(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(updated)
 
-
 		case http.MethodDelete:
-			if err := h.service.DeleteBook(id); err != nil {
+			if err := h.service.DeleteAuthor(id); err != nil {
 				if errors.Is(err, customerrors.ErrNotFound) {
-					http.Error(w, "Libro no encontrado", http.StatusNotFound)
+					http.Error(w, "Autor no encontrado", http.StatusNotFound)
 				} else {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 				}
