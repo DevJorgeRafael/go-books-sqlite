@@ -13,6 +13,9 @@ func SetupRoutes(container *Container) {
 	// ------------ Authors ------------
 	http.HandleFunc("/authors", container.AuthorHandler.HandleAuthors)
 	http.HandleFunc("/authors/", container.AuthorHandler.HandleAuthorByID)
+
+	// ----------- Author-Books ---------------
+	http.HandleFunc("/author-books", container.AuthorBookHandler.HandleAssociations)
 }
 
 // HealthCheckHandler es un manejador simple para verificar que el servidor está funcionando
